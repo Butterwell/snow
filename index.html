@@ -44,11 +44,24 @@ class: center, middle
 # The Mountain
 
     </textarea>
-    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
-    </script>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
       var slideshow = remark.create();
-      document.getElementById('#source').style.visibility = 'visable';
+      document.getElementById('source').style.visibility = 'visable';
+      slideshow.on('showSlide', function (slide) {
+        // Slide is the slide being navigated to
+        console.log("show",slide)
+      });
+      slideshow.on('hideSlide', function (slide) {
+        // Slide is the slide being navigated away from
+        console.log("hide",slide)
+      });
+      // disables remark's interactions, allowing user to program custom event handlers
+      // for keyboard events, etc...)
+      //   slideshow.pause()
+      // re-enables remarks default interaction event handlers
+      //   slideshow.resume()
     </script>
   </body>
 </html>
