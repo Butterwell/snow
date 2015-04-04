@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>The Making of "A Short History of Snowfall"</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      #source {
+        /* Hide the blog title and post titles while web fonts are loading */
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# The Making of "A Short History of Snowfall"
+## (Also, the working specification)
+
+---
+
+# Concept
+## Show the amount of snowfall on a map for each year.
+### I knew the data existed in some form.
+#### This is normally the case, you have *some* prior knowledge.
+
+---
+
+# The Perfect Dataset
+## An evenly spaced hex grid (binned) daily measurements of all the earth for all of recorded history.
+### Complete in time
+### Complete in space
+### Even in space
+
+---
+
+# The Available Data
+## First available snowfall measure
+## Coverage Dates
+### Human-relatable measurments. The weather stations are named.
+### Approachable data visualizations
+
+---
+
+# Accessing the Data
+## The API
+## Developer Access
+
+---
+
+# Station Data
+## Elements
+## Element size
+## Count
+## Total size
+## Time to get dynamicly
+
+---
+
+# Filter
+## JSON encoded
+## CSV encoded
+
+---
+
+# Plotting Station Data
+
+---
+
+# Offline Considerations
+
+---
+
+# Drawing Mountains of Snow
+
+---
+
+# Binning
+
+---
+
+# Vennilli Partitioning
+
+---
+
+# Melting
+## Not all stations measure current depth.
+## Since we were not showing the melting all along, is melting lieing?
+## First pass: reset to 0 depth on July 1st.
+
+---
+
+# Providing more information
+## Minimum yearly, maximum yearly on hover
+## Location name
+
+---
+
+# A Need for Speed
+## Don't waste my time
+## Station Encoding
+## Snowfall Encoding
+## Progressive enhancement
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      var slideshow = remark.create();
+      document.getElementById('source').style.visibility = 'visable';
+      slideshow.on('showSlide', function (slide) {
+        // slide being navigated to
+      });
+      slideshow.on('hideSlide', function (slide) {
+        // slide being navigated away from
+      });
+      // disables remark's interactions, allowing user to program custom event handlers
+      // for keyboard events, etc...)
+      //   slideshow.pause()
+      // re-enables remarks default interaction event handlers
+      //   slideshow.resume()
+    </script>
+  </body>
+</html>
