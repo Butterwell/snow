@@ -32,9 +32,9 @@ class: center, middle
 
 # Concept
 ## Show the amount of snowfall on a map for each year.
-This treatment inspired by the more-than-ever measured before snowfall that covered Boston in the winter of 2014-2015. After some research I found the data at:
-* http://www.ncdc.noaa.gov/cdo-web/webservices/v2
-* Instructions on how to get a developer token are there.
+This treatment inspired by the record-breaking snowfall in Boston for the winter of 2014-2015.
+* A REST API to query world-wide weather station measurements are available at: http://www.ncdc.noaa.gov/cdo-web/api/v2/...
+* Instructions on how to get a developer token to access the data are here: http://www.ncdc.noaa.gov/cdo-web/webservices/v2
 
 ---
 
@@ -53,7 +53,7 @@ $.ajax({ url: url, data:{}, headers:{ token: token } })
    }
  })
 ```
-This gaves us the dataset name with the SNOW data. To save a xhr call, calculate the enddate:
+This gaves us the dataset name with the SNOW data. To save a xhr(ajax) call, calculate the enddate:
 ```JavaScript
 var milli_since_1970 = new Date().getTime()
 var maxdate = new Date()
@@ -105,14 +105,16 @@ node get.js > first_500_stations.json
 ```
 ---
 
-# A Histogram of Earliest Weather Station Founding Year using D3
+# A Histogram of Earliest Weather Stations
+## by Founding Year using D3
 * https://github.com/mbostock/d3/wiki/Histogram-Layout
 * http://bl.ocks.org/mbostock/3048450
 * http://bl.ocks.org/mbostock/raw/3048450
 
 ---
 
-# A Map of the Earliest Weather Stations also using D3
+# A Map of the Earliest Weather Stations
+## also using D3
 
 ---
 
@@ -122,6 +124,7 @@ node get.js > first_500_stations.json
 
 # Projections
 * https://github.com/mbostock/d3/wiki/Geo-Projections
+* http://bl.ocks.org/mbostock/3711652
 
 ---
 
