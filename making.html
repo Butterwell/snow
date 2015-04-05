@@ -37,8 +37,9 @@ This treatment inspired by the more-than-ever measured before snowfall that cove
 * Instructions on how to get a developer token are there.
 
 ---
+
 # Daily Snow Measurements Dataset (Jquery)
-Unlike many web APIs, NOAA information is directly available from the browser using just a token:
+Unlike many APIs, NOAA information is directly available from the browser using the token:
 ```JavaScript
 var token="ThisIsNotAVaildToken"
 var url="https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?datatypeid=SNOW"
@@ -64,7 +65,9 @@ var snow_dataset = {
 }
 
 ```
+
 ---
+
 # Minimum Visualization Data
 Poking around at the data with curl, we find out that the maximum time span is one year. Since we're interested in snow, we break the year at July 1st. We also want a year with under 1000 entries, the maximum allowed in one call.
 ```bash
@@ -102,9 +105,25 @@ node get.js > first_500_stations.json
 ```
 ---
 
-# A First Plot
+# A Histogram of Earliest Weather Station Founding Year using D3
+* https://github.com/mbostock/d3/wiki/Histogram-Layout
+* http://bl.ocks.org/mbostock/3048450
+* http://bl.ocks.org/mbostock/raw/3048450
 
 ---
+
+# A Map of the Earliest Weather Stations also using D3
+
+---
+
+# GeoJSON and TopoJSON
+
+---
+
+# Projections
+
+---
+
 # The Perfect Dataset
 What dataset would make this trivial? The perfect dataset would be a evenly spaced hex grid (binned) daily measurements of all the earth for all of recorded history. That is, a regular grid hex where every hex had a measurement for every day.
 
@@ -133,11 +152,16 @@ What dataset would make this trivial? The perfect dataset would be a evenly spac
 
 ---
 
-# Binning
+# Hexagonal Binning
+* https://github.com/d3/d3-plugins/tree/master/hexbin
+* http://bl.ocks.org/mbostock/4248145
+* http://bl.ocks.org/mbostock/4248146
+* http://bl.ocks.org/mbostock/4330486
 
 ---
 
-# Vennilli Partitioning
+# Voronoi Tessellation
+* http://bl.ocks.org/mbostock/4060366
 
 ---
 
@@ -166,6 +190,7 @@ If we display a day's worth of information in one frame, and run the visualizati
 * Station Encoding
 * Snowfall Encoding
 * Progressive enhancement
+* Additional benifit, don't expose token
 
 ---
 
