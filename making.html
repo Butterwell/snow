@@ -18,10 +18,7 @@
         /* Hide the blog title and post titles while web fonts are loading */
         visibility: hidden;
       }
-      
-      .shrink-bl-ocks-raw-iframe {
-        width: 968px;
-        height:528px;
+      .three-quarters {
         -moz-transform: scale(0.75, 0.75); 
         -webkit-transform: scale(0.75, 0.75); 
         -o-transform: scale(0.75, 0.75);
@@ -32,6 +29,10 @@
         -o-transform-origin: top left;
         -ms-transform-origin: top left;
         transform-origin: top left;
+      }
+      .bl-ocks-raw-size {
+        width: 968px;
+        height:528px;
       }
     </style>
   </head>
@@ -47,59 +48,81 @@ class: center, middle
 
 # Concept
 ## Show the amount of snowfall on a map for each year.
-### I knew the data existed in some form.
-#### This is normally the case, you have *some* prior knowledge.
+This treatment inspired by the more-than-ever measured before snowfall that covered Boston in the winter of 2014-2015. After some research I found the data at: http://www.ncdc.noaa.gov/cdo-web/ and, in particular, the JSON api: http://www.ncdc.noaa.gov/cdo-web/webservices/v2
+
+### But first, let's take a step back. What's the perfect dataset?
 
 ---
 
 # The Perfect Dataset
-## An evenly spaced hex grid (binned) daily measurements of all the earth for all of recorded history.
-### Complete in time
-### Complete in space
-### Even in space
-
----
-
-# The Available Data
-## Indirection
-### Station
-### Snowfall
-## First available snowfall measure
-## Coverage Dates
-### Human-relatable measurments. The weather stations are named.
-### Approachable data visualizations
+What dataset would make this trivial? The perfect dataset would be a evenly spaced hex grid (binned) daily measurements of all the earth for all of recorded history. That is, a regular grid hex where every hex had a measurement for every day.
 
 ---
 
 # Accessing the Data
 ## The API
+### Stations
+### Snow
 ## Developer Access
 
 ---
 
-# Station Data
-## Elements
-## Element size
-## Count
-## Total size
-## Time to get dynamicly
+# The Available Datasets
+
+## Irregularities
+* Stations are not in a grid
+* Stations do not have data every day
+* Stations are added and removed over time 
+## Snowfall
+* First available snowfall measure
+* Coverage Dates
 
 ---
 
-# Filter
-## JSON encoded
-## CSV encoded
+# How Much Data
 
+---
+
+# Station Data
+* Elements
+* Element size
+* Count
+* Total size
+* Time to get dynamicly
+
+---
+
+# A Bit About curl
+curl is a one-shot workhorse. This:
+```bash
+token=ThisIsNotAVaildToken
+curl --header "Token: $token" --get \
+-d datatypeid=SNOW -d limit=500 -d sortfield=mindate \
+www.ncdc.noaa.gov/cdo-web/api/v2/stations > first_500_stations.json
+```
+is the same as, given the file get.js:
+
+```JavaScript
+var request = require('request');
+
+var options = {
+    headers: { 'Token': 'ThisIsNotAValidToken' },
+    uri: 'https://www.ncdc.noaa.gov/cdo-web/api/v2/stations'+
+         '?datatypeid=SNOW&limit=5&sortfield=mindate'
+};
+
+request(options, function (error, resp, body) {
+    console.log(body)
+});
+```
+```bash
+node get.js > first_500_stations.json
+```
 ---
 
 # Plotting Station Data
 Something like this:
-<iframe class="shrink-bl-ocks-raw-iframe" scrolling="no" seemless="seemless" src="http://bl.ocks.org/Butterwell/raw/eee5c0d9e18f6f6d33ea"></iframe>
-
----
-
-# Station Data
-Likely, you noticed a quite a delay for the data load. Let's fix that.
+<iframe class="three-quarters bl-ocks-raw-size" scrolling="no" seemless="seemless" src="http://bl.ocks.org/Butterwell/raw/eee5c0d9e18f6f6d33ea"></iframe>
 
 ---
 
@@ -121,23 +144,37 @@ Likely, you noticed a quite a delay for the data load. Let's fix that.
 ---
 
 # Melting
-## Not all stations measure current depth.
-## Since we were not showing the melting all along, is melting lieing?
-## First pass: reset to 0 depth on July 1st.
+* Not all stations measure current depth.
+* Since we were not showing the melting all along, is melting lieing?
+* First pass: reset to 0 depth on July 1st.
+
+---
+
+# Wait... How Long is This Going to Take?
+* We have data from 186x to 2015.
+If we display a day's worth of information in one frame, and run the visualization at twenty-four frames a second, a year takes about a second and a half to display. ((2015-1860)*365/24)/60 = 39 minutes. 
 
 ---
 
 # Providing more information
-## Minimum yearly, maximum yearly on hover
-## Location name
+* Minimum yearly, maximum yearly on hover
+* Location name
 
 ---
 
 # A Need for Speed
-## Don't waste my time
-## Station Encoding
-## Snowfall Encoding
-## Progressive enhancement
+* What is the fastest we can deliver it the first time
+* What is the fastest we can deliver it subsequent times
+* Station Encoding
+* Snowfall Encoding
+* Progressive enhancement
+
+---
+
+# Only the Data We Need
+* JSON encoded
+* CSV encoded
+
 
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
@@ -147,6 +184,9 @@ Likely, you noticed a quite a delay for the data load. Let's fix that.
       document.getElementById('source').style.visibility = 'visable';
       slideshow.on('showSlide', function (slide) {
         // slide being navigated to
+        console.log(slide)
+        slide.content[0]="Blat.\n"+slide.content[0]
+        console.log(slide)
       });
       slideshow.on('hideSlide', function (slide) {
         // slide being navigated away from
