@@ -39,7 +39,7 @@ This treatment inspired by the more-than-ever measured before snowfall that cove
 ---
 
 # Daily Snow Measurements Dataset (Jquery)
-Unlike many APIs, NOAA information is directly available from the browser using the token:
+NOAA information is directly available from the browser using the token:
 ```JavaScript
 var token="ThisIsNotAVaildToken"
 var url="https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?datatypeid=SNOW"
@@ -53,7 +53,7 @@ $.ajax({ url: url, data:{}, headers:{ token: token } })
    }
  })
 ```
-That gave us the dataset name that has the SNOW data. Since we don't want to have to make this xhr call each time, we can calculate the equivalent:
+This gaves us the dataset name with the SNOW data. To save a xhr call, calculate the enddate:
 ```JavaScript
 var milli_since_1970 = new Date().getTime()
 var maxdate = new Date()
@@ -78,14 +78,14 @@ www.ncdc.noaa.gov/cdo-web/api/v2/data > winter_snow_1859_1860.json
 ---
 
 # A Bit About curl
-curl is a one-shot workhorse. To get the first 500 weather stations by date, thusly:
+curl is a one-shot workhorse. To get the first 500 weather stations by date:
 ```bash
 token=ThisIsNotAVaildToken
 curl --header "Token: $token" --get \
 -d datatypeid=SNOW -d limit=500 -d sortfield=mindate \
 www.ncdc.noaa.gov/cdo-web/api/v2/stations > first_500_stations.json
 ```
-is the same as, given the nodejs file get.js:
+This is the same as, given the nodejs file get.js:
 
 ```JavaScript
 var request = require('request');
@@ -198,6 +198,11 @@ If we display a day's worth of information in one frame, and run the visualizati
 # Only the Data We Need
 * JSON encoded
 * CSV encoded
+
+---
+
+# NOAA Available Data
+It took some exploration of the datatypeids to find "SNOW". Here's a list.
 
 
     </textarea>
