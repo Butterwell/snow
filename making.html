@@ -18,22 +18,6 @@
         /* Hide the blog title and post titles while web fonts are loading */
         visibility: hidden;
       }
-      .three-quarters {
-        -moz-transform: scale(0.75, 0.75); 
-        -webkit-transform: scale(0.75, 0.75); 
-        -o-transform: scale(0.75, 0.75);
-        -ms-transform: scale(0.75, 0.75);
-        transform: scale(0.75, 0.75); 
-        -moz-transform-origin: top left;
-        -webkit-transform-origin: top left;
-        -o-transform-origin: top left;
-        -ms-transform-origin: top left;
-        transform-origin: top left;
-      }
-      .bl-ocks-raw-size {
-        width: 968px;
-        height:528px;
-      }
     </style>
   </head>
   <body>
@@ -48,59 +32,57 @@ class: center, middle
 
 # Concept
 ## Show the amount of snowfall on a map for each year.
-This treatment inspired by the more-than-ever measured before snowfall that covered Boston in the winter of 2014-2015. After some research I found the data at: http://www.ncdc.noaa.gov/cdo-web/ and, in particular, the JSON api: http://www.ncdc.noaa.gov/cdo-web/webservices/v2
-
-### But first, let's take a step back. What's the perfect dataset?
-
----
-
-# The Perfect Dataset
-What dataset would make this trivial? The perfect dataset would be a evenly spaced hex grid (binned) daily measurements of all the earth for all of recorded history. That is, a regular grid hex where every hex had a measurement for every day.
+This treatment inspired by the more-than-ever measured before snowfall that covered Boston in the winter of 2014-2015. After some research I found the data at:
+* http://www.ncdc.noaa.gov/cdo-web/webservices/v2
+* Instructions on how to get a developer token are there.
 
 ---
+# Daily Snow Measurements Dataset (Jquery)
+Unlike many web APIs, NOAA information is directly available from the browser using just a token:
+```JavaScript
+var token="ThisIsNotAVaildToken"
+var url="https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?datatypeid=SNOW"
+var snow_dataset;
+$.ajax({ url: url, data:{}, headers:{ token: token } })
+ .done(function (data) {
+   snow_dataset = {
+     dataset: data.results[0].id,
+     mindate: data.results[0].mindate,
+     maxdate: data.results[0].maxdate
+   }
+ })
+```
+That gave us the dataset name that has the SNOW data. Since we don't want to have to make this xhr call each time, we can calculate the equivalent:
+```JavaScript
+var milli_since_1970 = new Date().getTime()
+var maxdate = new Date()
+maxdate.setTime( milli_since_1970 - 2 * 86400000 ) // A couple of days ago
+var snow_dataset = {
+  dataset: "GHCND",
+  mindate: "1763-01-01",
+  maxdate: maxdate.toISOString().split("T")[0]
+}
 
-# Accessing the Data
-## The API
-### Stations
-### Snow
-## Developer Access
-
+```
 ---
-
-# The Available Datasets
-
-## Irregularities
-* Stations are not in a grid
-* Stations do not have data every day
-* Stations are added and removed over time 
-## Snowfall
-* First available snowfall measure
-* Coverage Dates
-
----
-
-# How Much Data
-
----
-
-# Station Data
-* Elements
-* Element size
-* Count
-* Total size
-* Time to get dynamicly
-
+# Minimum Visualization Data
+Poking around at the data with curl, we find out that the maximum time span is one year. Since we're interested in snow, we break the year at July 1st. We also want a year with under 1000 entries, the maximum allowed in one call.
+```bash
+curl --header "token: $token" --get -d datasetid=GHCND \
+-d startdate=1859-07-01 -d enddate=1860-07-01 -d datatypeid=SNOW -d limit=1000 \
+www.ncdc.noaa.gov/cdo-web/api/v2/data > winter_snow_1859_1860.json
+```
 ---
 
 # A Bit About curl
-curl is a one-shot workhorse. This:
+curl is a one-shot workhorse. To get the first 500 weather stations by date, thusly:
 ```bash
 token=ThisIsNotAVaildToken
 curl --header "Token: $token" --get \
 -d datatypeid=SNOW -d limit=500 -d sortfield=mindate \
 www.ncdc.noaa.gov/cdo-web/api/v2/stations > first_500_stations.json
 ```
-is the same as, given the file get.js:
+is the same as, given the nodejs file get.js:
 
 ```JavaScript
 var request = require('request');
@@ -108,7 +90,7 @@ var request = require('request');
 var options = {
     headers: { 'Token': 'ThisIsNotAValidToken' },
     uri: 'https://www.ncdc.noaa.gov/cdo-web/api/v2/stations'+
-         '?datatypeid=SNOW&limit=5&sortfield=mindate'
+         '?datatypeid=SNOW&limit=500&sortfield=mindate'
 };
 
 request(options, function (error, resp, body) {
@@ -120,9 +102,25 @@ node get.js > first_500_stations.json
 ```
 ---
 
-# Plotting Station Data
-Something like this:
-<iframe class="three-quarters bl-ocks-raw-size" scrolling="no" seemless="seemless" src="http://bl.ocks.org/Butterwell/raw/eee5c0d9e18f6f6d33ea"></iframe>
+# A First Plot
+
+---
+# The Perfect Dataset
+What dataset would make this trivial? The perfect dataset would be a evenly spaced hex grid (binned) daily measurements of all the earth for all of recorded history. That is, a regular grid hex where every hex had a measurement for every day.
+
+---
+
+# Irregularities
+* Stations are not in a grid
+* Stations do not have data every day
+* Stations are added and removed over time
+# Snowfall
+* First available snowfall measure
+* Coverage Dates
+
+---
+
+# How Much Data
 
 ---
 
@@ -184,9 +182,6 @@ If we display a day's worth of information in one frame, and run the visualizati
       document.getElementById('source').style.visibility = 'visable';
       slideshow.on('showSlide', function (slide) {
         // slide being navigated to
-        console.log(slide)
-        slide.content[0]="Blat.\n"+slide.content[0]
-        console.log(slide)
       });
       slideshow.on('hideSlide', function (slide) {
         // slide being navigated away from

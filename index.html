@@ -28,18 +28,12 @@ class: center, middle
 
 ---
 
-# The First Snow Measurement Preserved in ...
-
-
----
-
-# A Mountain of Snow
-
-Once we have the measurements, we can depict the accumulations. This is done with the help of a 
+# The First Snow Measurement Preserved in the NOAA GHCND Dataset (Daily Measurements)
 
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
     <script>
       var slideshow = remark.create();
       document.getElementById('source').style.visibility = 'visable';
@@ -54,6 +48,17 @@ Once we have the measurements, we can depict the accumulations. This is done wit
       //   slideshow.pause()
       // re-enables remarks default interaction event handlers
       //   slideshow.resume()
+    </script>
+    <script>
+      var token = 'PWkugjlZEClBlLFEFNQbNjomaSBKVhhI' // Get your own, see: http://www.ncdc.noaa.gov/cdo-web/webservices/v2
+      var milli_since_1970 = new Date().getTime()
+      var maxdate = new Date()
+      maxdate.setTime( milli_since_1970 - 2 * 86400000 ) // A couple of days ago
+      var snow_dataset = {
+        dataset: "GHCND",
+        mindate: "1763-01-01",
+        maxdate: maxdate.toISOString().split("T")[0]
+      }
     </script>
   </body>
 </html>
