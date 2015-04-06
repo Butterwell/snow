@@ -13,10 +13,30 @@
         font-family: 'Yanone Kaffeesatz';
         font-weight: normal;
       }
+      .subtitle {
+        font-size: 60%;
+        white-space: nowrap;
+      }
       .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
       #source {
         /* Hide the blog title and post titles while web fonts are loading */
         visibility: hidden;
+      }
+
+      /* Histogram Styling */
+      .bar rect {
+        fill: steelblue;
+        shape-rendering: crispEdges;
+      }
+
+      .bar text {
+        fill: #fff;
+      }
+
+      .axis path, .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
       }
     </style>
   </head>
@@ -83,7 +103,7 @@ curl is a one-shot workhorse. To get the first 500 weather stations by date:
 token=ThisIsNotAVaildToken
 curl --header "Token: $token" --get \
 -d datatypeid=SNOW -d limit=500 -d sortfield=mindate \
-www.ncdc.noaa.gov/cdo-web/api/v2/stations > first_500_stations.json
+www.ncdc.noaa.gov/cdo-web/api/v2/stations > earliest_500_snow_stations.json
 ```
 This is the same as, given the nodejs file get.js:
 
@@ -101,20 +121,19 @@ request(options, function (error, resp, body) {
 });
 ```
 ```bash
-node get.js > first_500_stations.json
+node get.js > earliest_500_snow_stations.json
 ```
 ---
 
-# A Histogram of Earliest Weather Stations
-## by Founding Year using D3
-* https://github.com/mbostock/d3/wiki/Histogram-Layout
-* http://bl.ocks.org/mbostock/3048450
-* http://bl.ocks.org/mbostock/raw/3048450
+# A Histogram of Earliest Weather Stations .subtitle[by Founding Year using D3 (simulated)]
+
+.station_founding_year[]
+
+See: https://github.com/mbostock/d3/wiki/Histogram-Layout and http://bl.ocks.org/mbostock/3048450
 
 ---
 
-# A Map of the Earliest Weather Stations
-## also using D3
+# A Map of the Earliest Weather Stations .subtitle[also using D3]
 
 ---
 
@@ -211,6 +230,8 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="year_histogram.js"></script>
     <script>
       var slideshow = remark.create();
       document.getElementById('source').style.visibility = 'visable';
@@ -225,6 +246,9 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
       //   slideshow.pause()
       // re-enables remarks default interaction event handlers
       //   slideshow.resume()
+
+      var years = d3.range(100).map(function(d) { return 1840 + Math.floor(d3.random.bates(10)(d) * 150) })
+      year_histogram({ selectee: ".station_founding_year", width: 600, height: 200 }, years )
     </script>
   </body>
 </html>
