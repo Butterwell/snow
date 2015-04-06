@@ -8,9 +8,9 @@ var margin = {top: 10, right: 30, bottom: 30, left: 30}
 var width = options.width - margin.left - margin.right
 var height = options.height - margin.top - margin.bottom
 
-// 1 - 10 year padding on both ends
-var x_min = Math.floor((d3.min(values)-10)/10)*10
-var x_max = Math.floor((d3.max(values)+10)/10)*10
+// 0 - 9 year padding on both ends
+var x_min = Math.floor((d3.min(values)-9)/10)*10
+var x_max = Math.ceil((d3.max(values)+9)/10)*10
 
 var x = d3.scale.linear()
     .domain([x_min, x_max])
@@ -42,7 +42,7 @@ var bar = svg.selectAll(".bar")
     .data(data)
   .enter().append("g")
     .attr("class", "bar")
-    .attr("transform", function(d,i) { return "translate(" + i*bar_width + "," + y(d.y) + ")"; });
+    .attr("transform", function(d,i) { return "translate(" + (i*bar_width - 1) + "," + y(d.y) + ")"; });
 
 bar.append("rect")
     .attr("x", 1)
