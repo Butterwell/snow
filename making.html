@@ -58,47 +58,22 @@ This treatment inspired by the record-breaking snowfall in Boston for the winter
 
 ---
 
-# Daily Snow Measurements Dataset (Jquery)
-NOAA information is directly available from the browser using the token:
-```JavaScript
-var token="ThisIsNotAVaildToken"
-var url="https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?datatypeid=SNOW"
-var snow_dataset;
-$.ajax({ url: url, data:{}, headers:{ token: token } })
- .done(function (data) {
-   snow_dataset = {
-     dataset: data.results[0].id,
-     mindate: data.results[0].mindate,
-     maxdate: data.results[0].maxdate
-   }
- })
-```
-This gaves us the dataset name with the SNOW data. To save a xhr(ajax) call, calculate the enddate:
-```JavaScript
-var milli_since_1970 = new Date().getTime()
-var maxdate = new Date()
-maxdate.setTime( milli_since_1970 - 2 * 86400000 ) // A couple of days ago
-var snow_dataset = {
-  dataset: "GHCND",
-  mindate: "1763-01-01",
-  maxdate: maxdate.toISOString().split("T")[0]
-}
+# The Perfect Dataset
+What dataset would make project trivial?
+* Evenly spaced data
+* Daily measurements
+* Covering the earth
+* For all the earth for all of recorded history
 
-```
+Let's start with where measurements are made: weather stations. In particular...
 
 ---
 
-# Minimum Visualization Data
-Poking around at the data with curl, we find out that the maximum time span is one year. Since we're interested in snow, we break the year at July 1st. We also want a year with under 1000 entries, the maximum allowed in one call.
-```bash
-curl --header "token: $token" --get -d datasetid=GHCND \
--d startdate=1859-07-01 -d enddate=1860-07-01 -d datatypeid=SNOW -d limit=1000 \
-www.ncdc.noaa.gov/cdo-web/api/v2/data > winter_snow_1859_1860.json
-```
----
+# Snow Weather Stations
 
-# A Bit About curl
-curl is a one-shot workhorse. To get the first 1000 weather stations by date:
+The API delivers a maximum of 1000 records a call.
+
+To get the first 1000 weather stations by date with curl:
 ```bash
 token=ThisIsNotAVaildToken
 curl --header "Token: $token" --get \
@@ -129,14 +104,57 @@ node get.js > earliest_1000_snow_stations.json
 
 .station_founding_year[]
 
-
-Adapped from: http://bl.ocks.org/mbostock/3048450
-
 ---
 
 # Number of Weather Stations Measuring Snowfall .subtitle[the Early Years]
 
 .stations_active_by_year[]
+
+At this point we don't know where any of these stations are. They might all be in...
+
+---
+
+# Canada
+
+
+
+Not all, but many are.  This could be misleading... we don't know if there are any measurements for any of these stations. Let's grab some data.
+
+---
+
+# Daily Snow Measurements Dataset (Jquery)
+The station information is at the top level of the API. Here's how to search the "datasets" dataset to find all the datasets than have "SNOW", the datatypeid of the field we want:
+```JavaScript
+var token="ThisIsNotAVaildToken"
+var url="https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?datatypeid=SNOW"
+var snow_dataset;
+$.ajax({ url: url, data:{}, headers:{ token: token } })
+ .done(function (data) {
+   snow_dataset = {
+     dataset: data.results[0].id,
+     mindate: data.results[0].mindate,
+     maxdate: data.results[0].maxdate
+   }
+ })
+```
+This gaves us the dataset name with the SNOW data. D3 has a xhr/ajax nice xhr/ajax interface:
+```JavaScript
+d3.json("https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets")
+  .header("token", token)
+  .get("datatypeid=SNOW", function(error, data) {
+      // callback
+  });
+```
+
+---
+
+# Minimum Visualization Data
+Poking around at the data with curl, we find out that the maximum time span is one year. Since we're interested in snow, we break the year at July 1st. We also want a year with under 1000 entries, the maximum allowed in one call.
+```bash
+curl --header "token: $token" --get -d datasetid=GHCND \
+-d startdate=1859-07-01 -d enddate=1860-07-01 -d datatypeid=SNOW -d limit=1000 \
+www.ncdc.noaa.gov/cdo-web/api/v2/data > winter_snow_1859_1860.json
+```
 
 ---
 
@@ -159,11 +177,6 @@ The best visualization depends on the story you want to tell. All of these
 # Projections
 * https://github.com/mbostock/d3/wiki/Geo-Projections
 * http://bl.ocks.org/mbostock/3711652
-
----
-
-# The Perfect Dataset
-What dataset would make this trivial? The perfect dataset would be a evenly spaced hex grid (binned) daily measurements of all the earth for all of recorded history. That is, a regular grid hex where every hex had a measurement for every day.
 
 ---
 
@@ -272,6 +285,8 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
         year_histogram({ selectee: ".station_founding_year", width: 700, height: 300 }, before_1890 )
         year_histogram({ selectee: ".stations_active_by_year", width: 700, height: 300, running_total: true }, before_1890 )
       });
+
+      
     </script>
   </body>
 </html>
