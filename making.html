@@ -98,12 +98,12 @@ www.ncdc.noaa.gov/cdo-web/api/v2/data > winter_snow_1859_1860.json
 ---
 
 # A Bit About curl
-curl is a one-shot workhorse. To get the first 500 weather stations by date:
+curl is a one-shot workhorse. To get the first 1000 weather stations by date:
 ```bash
 token=ThisIsNotAVaildToken
 curl --header "Token: $token" --get \
--d datatypeid=SNOW -d limit=500 -d sortfield=mindate \
-www.ncdc.noaa.gov/cdo-web/api/v2/stations > earliest_500_snow_stations.json
+-d datatypeid=SNOW -d limit=1000 -d sortfield=mindate \
+www.ncdc.noaa.gov/cdo-web/api/v2/stations > earliest_1000_snow_stations.json
 ```
 This is the same as, given the nodejs file get.js:
 
@@ -113,7 +113,7 @@ var request = require('request');
 var options = {
     headers: { 'Token': 'ThisIsNotAValidToken' },
     uri: 'https://www.ncdc.noaa.gov/cdo-web/api/v2/stations'+
-         '?datatypeid=SNOW&limit=500&sortfield=mindate'
+         '?datatypeid=SNOW&limit=1000&sortfield=mindate'
 };
 
 request(options, function (error, resp, body) {
@@ -121,19 +121,34 @@ request(options, function (error, resp, body) {
 });
 ```
 ```bash
-node get.js > earliest_500_snow_stations.json
+node get.js > earliest_1000_snow_stations.json
 ```
 ---
 
-# A Histogram of Earliest Weather Stations .subtitle[by Founding Year using D3 (simulated)]
+# Earliest Weather Stations Measuring Snowfall .subtitle[by Founding Year using D3]
 
 .station_founding_year[]
 
-See: https://github.com/mbostock/d3/wiki/Histogram-Layout and http://bl.ocks.org/mbostock/3048450
+
+Adapped from: http://bl.ocks.org/mbostock/3048450
 
 ---
 
-# A Map of the Earliest Weather Stations .subtitle[also using D3]
+# Number of Weather Stations Measuring Snowfall .subtitle[the Early Years]
+
+.stations_active_by_year[]
+
+---
+
+# Binning
+
+The best visualization depends on the story you want to tell. All of these 
+
+---
+
+# Earliest Weather Stations Measuring Snow .subtitle[Mapped using D3]
+
+.station_map[]
 
 ---
 
@@ -247,8 +262,16 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
       // re-enables remarks default interaction event handlers
       //   slideshow.resume()
 
-      var years = d3.range(100).map(function(d) { return 1840 + Math.floor(d3.random.bates(10)(d) * 150) })
-      year_histogram({ selectee: ".station_founding_year", width: 600, height: 200 }, years )
+      // Active Station Plots
+      var station_data;
+      d3.json("earliest_1000_snow_stations.json", function(error, json) {
+        if (error) return console.warn(error);
+        station_data = json.results
+        var founding_years = station_data.map(function(d) { return parseInt(d.mindate.substr(0,4)) })
+        var before_1890 = founding_years.filter(function(d) { return d < 1890 })
+        year_histogram({ selectee: ".station_founding_year", width: 700, height: 300 }, before_1890 )
+        year_histogram({ selectee: ".stations_active_by_year", width: 700, height: 300, running_total: true }, before_1890 )
+      });
     </script>
   </body>
 </html>

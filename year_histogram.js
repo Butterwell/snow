@@ -8,20 +8,32 @@ var margin = {top: 10, right: 30, bottom: 30, left: 30}
 var width = options.width - margin.left - margin.right
 var height = options.height - margin.top - margin.bottom
 
-// 0 - 9 year padding on both ends
-var x_min = Math.floor((d3.min(values)-9)/10)*10
-var x_max = Math.ceil((d3.max(values)+9)/10)*10
+// Align with decade
+var x_min = Math.floor((d3.min(values))/10)*10
+var x_max = Math.ceil((d3.max(values))/10)*10
 
 var x = d3.scale.linear()
     .domain([x_min, x_max])
     .range([0, width]);
 
-var bins = (x_max - x_min) / 5 // 5 year bins
+var bins = (x_max - x_min) / 5 // 10 year bins
 var bar_width = width/bins
 
 var data = d3.layout.histogram()
     .bins(x.ticks(bins))
     (values);
+
+// Create running total (kludge)
+if ( options.running_total ) {
+  var total = []
+  data = data.map(function(d) {
+    total = total.concat(d)
+    total.x = d.x
+    total.y = total.length
+    total.dx = d.dx
+    return total
+  })
+}
 
 var y = d3.scale.linear()
     .domain([0, d3.max(data, function(d) { return d.y; })])
@@ -30,7 +42,7 @@ var y = d3.scale.linear()
 var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom")
-    .tickFormat(d3.format("04d"));
+    .tickFormat(function(d) { return !(d % 10)?d:""; }) // Only label decades
 
 var svg = d3.select(options.selectee).append("svg")
     .attr("width", options.width)
