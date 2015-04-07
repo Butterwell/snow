@@ -38,6 +38,43 @@
         stroke: #000;
         shape-rendering: crispEdges;
       }
+
+/*
+      body {
+  background: #fcfcfa;
+  height: 500px;
+  position: relative;
+  width: 960px;
+}
+*/
+.stroke {
+  fill: none;
+  stroke: #000;
+  stroke-width: 3px;
+}
+
+.fill {
+  fill: #fff;
+}
+
+.graticule {
+  fill: none;
+  stroke: #999;
+  stroke-width: .5px;
+  stroke-opacity: .5;
+}
+
+.land {
+  fill: #777;
+}
+
+.boundary {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+
+
     </style>
   </head>
   <body>
@@ -114,9 +151,11 @@ At this point we don't know where any of these stations are. They might all be i
 
 ---
 
-# Canada
+# Canada - .subtitle[ Earliest Weather Stations Measuring Snow]
 
+.early_station_map[]
 
+---
 
 Not all, but many are.  This could be misleading... we don't know if there are any measurements for any of these stations. Let's grab some data.
 
@@ -145,10 +184,10 @@ d3.json("https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets")
       // callback
   });
 ```
-
 ---
 
-# Minimum Visualization Data
+# Minimum Visualization Data (1)
+
 Poking around at the data with curl, we find out that the maximum time span is one year. Since we're interested in snow, we break the year at July 1st. We also want a year with under 1000 entries, the maximum allowed in one call.
 ```bash
 curl --header "token: $token" --get -d datasetid=GHCND \
@@ -158,17 +197,20 @@ www.ncdc.noaa.gov/cdo-web/api/v2/data > winter_snow_1859_1860.json
 
 ---
 
-# Binning
+# Minimum Visualization Data (2)
 
-The best visualization depends on the story you want to tell. All of these 
+There are 499 entries for this winter. Let's plot the count of non-zero entries.
+
+.snow_measures_1859_1860[]
+
+Several entries at the 230 mark, that's in mm. Boston values for January 1st and 2nd, 2014.
+
+.snow_measures_2014_01_01[]
+
+There are 226 entries and about the same distribution. 230mm is about 9".
 
 ---
 
-# Earliest Weather Stations Measuring Snow .subtitle[Mapped using D3]
-
-.station_map[]
-
----
 
 # GeoJSON and TopoJSON
 
@@ -258,8 +300,10 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
     <script src="year_histogram.js"></script>
+    <script src="map.js"></script>
     <script>
       var slideshow = remark.create();
       document.getElementById('source').style.visibility = 'visable';
@@ -275,6 +319,17 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
       // re-enables remarks default interaction event handlers
       //   slideshow.resume()
 
+      function station_to_geojson(json) {
+        return
+          json.filter( function(p){ return p.latitude && p.longitude } )
+              .map(function(p){
+                 return {
+                   "type": "Point",
+                   "coordinates": [p.longitude, p.latitude], // , p.elevation]
+                 }
+              })
+      }
+
       // Active Station Plots
       var station_data;
       d3.json("earliest_1000_snow_stations.json", function(error, json) {
@@ -284,8 +339,22 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
         var before_1890 = founding_years.filter(function(d) { return d < 1890 })
         year_histogram({ selectee: ".station_founding_year", width: 700, height: 300 }, before_1890 )
         year_histogram({ selectee: ".stations_active_by_year", width: 700, height: 300, running_total: true }, before_1890 )
+        var p = station_to_geojson(station_data)
+        map({ selectee: ".early_station_map", width: 800, height: 600 }, p )
+      });
+      d3.json("winter_snow_1859_1860.json", function(error, json) {
+        if (error) return console.warn(error);
+        var reports = json.results
+        var non_zero = reports.filter(function(d) { return d.value != 0 }).map(function(d) { return d.value })
+        year_histogram({ selectee: ".snow_measures_1859_1860", width: 700, height: 150 }, non_zero )
       });
 
+      d3.json("snow_2014_01_01_2014_01_02.json", function(error, json) {
+        if (error) return console.warn(error);
+        var reports = json.results
+        var non_zero = reports.filter(function(d) { return d.value != 0 }).map(function(d) { return d.value })
+        year_histogram({ selectee: ".snow_measures_2014_01_01", width: 700, height: 150 }, non_zero )
+      });
       
     </script>
   </body>
