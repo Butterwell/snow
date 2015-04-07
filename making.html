@@ -4,49 +4,45 @@
     <title>The Making of "A Short History of Snowfall"</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <style type="text/css">
-      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
-      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
-      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
 
-      body { font-family: 'Droid Serif'; }
-      h1, h2, h3 {
-        font-family: 'Yanone Kaffeesatz';
-        font-weight: normal;
-      }
-      .subtitle {
-        font-size: 60%;
-        white-space: nowrap;
-      }
-      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
-      #source {
-        /* Hide the blog title and post titles while web fonts are loading */
-        visibility: hidden;
-      }
+@import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+@import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+@import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
 
-      /* Histogram Styling */
-      .bar rect {
-        fill: steelblue;
-        shape-rendering: crispEdges;
-      }
-
-      .bar text {
-        fill: #fff;
-      }
-
-      .axis path, .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-      }
-
-/*
-      body {
-  background: #fcfcfa;
-  height: 500px;
-  position: relative;
-  width: 960px;
+/* Remark Styling */
+body { font-family: 'Droid Serif'; }
+h1, h2, h3 {
+  font-family: 'Yanone Kaffeesatz';
+  font-weight: normal;
 }
-*/
+
+.subtitle {
+  font-size: 60%;
+  white-space: nowrap;
+}
+.remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+#source {
+  /* Hide the blog title and post titles while web fonts are loading */
+  visibility: hidden;
+}
+
+/* Histogram Styling */
+.bar rect {
+  fill: steelblue;
+  shape-rendering: crispEdges;
+}
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+/* Map Styling */
 .stroke {
   fill: none;
   stroke: #000;
@@ -73,7 +69,6 @@
   stroke: #fff;
   stroke-width: .5px;
 }
-
 
     </style>
   </head>
@@ -296,7 +291,6 @@ If we display a day's worth of information in one frame, and run the visualizati
 # NOAA Available Data
 It took some exploration of the datatypeids to find "SNOW". Here's a list.
 
-
     </textarea>
     <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
@@ -319,41 +313,37 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
       // re-enables remarks default interaction event handlers
       //   slideshow.resume()
 
-      function station_to_geojson(json) {
-        return
-          json.filter( function(p){ return p.latitude && p.longitude } )
-              .map(function(p){
-                 return {
-                   "type": "Point",
-                   "coordinates": [p.longitude, p.latitude], // , p.elevation]
-                 }
-              })
-      }
-
       // Active Station Plots
-      var station_data;
       d3.json("earliest_1000_snow_stations.json", function(error, json) {
         if (error) return console.warn(error);
-        station_data = json.results
-        var founding_years = station_data.map(function(d) { return parseInt(d.mindate.substr(0,4)) })
-        var before_1890 = founding_years.filter(function(d) { return d < 1890 })
+        var station_data = json.results
+
+        var founding_years = station_data.map( function(d) { return parseInt(d.mindate.substr(0,4)) })
+        var before_1890 = founding_years.filter( function(d) { return d < 1890 })
         year_histogram({ selectee: ".station_founding_year", width: 700, height: 300 }, before_1890 )
+
         year_histogram({ selectee: ".stations_active_by_year", width: 700, height: 300, running_total: true }, before_1890 )
-        var p = station_to_geojson(station_data)
-        map({ selectee: ".early_station_map", width: 800, height: 600 }, p )
+
+        var plotable_stations = station_data.filter( function(p){ return p.latitude && p.longitude } )
+        var geojson_stations = plotable_stations.map( function(p){ return { "type": "Point",
+                                                                           "coordinates": [p.longitude, p.latitude]
+                                                                         } })
+        map({ selectee: ".early_station_map", width: 800, height: 600 }, geojson_stations )
       });
+
+      // Snowfall histograms
       d3.json("winter_snow_1859_1860.json", function(error, json) {
         if (error) return console.warn(error);
         var reports = json.results
-        var non_zero = reports.filter(function(d) { return d.value != 0 }).map(function(d) { return d.value })
+        var non_zero = reports.filter( function(d) { return d.value != 0 }).map( function(d) { return d.value })
         year_histogram({ selectee: ".snow_measures_1859_1860", width: 700, height: 150 }, non_zero )
       });
 
       d3.json("snow_2014_01_01_2014_01_02.json", function(error, json) {
         if (error) return console.warn(error);
         var reports = json.results
-        var non_zero = reports.filter(function(d) { return d.value != 0 }).map(function(d) { return d.value })
-        year_histogram({ selectee: ".snow_measures_2014_01_01", width: 700, height: 150 }, non_zero )
+        var non_zero = reports.filter( function(d) { return d.value != 0 } ).map( function(d) { return d.value } )
+        year_histogram( { selectee: ".snow_measures_2014_01_01", width: 700, height: 150 }, non_zero )
       });
       
     </script>
