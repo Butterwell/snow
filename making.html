@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head>
+  <header>
     <title>The Making of "A Short History of Snowfall"</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <style type="text/css">
@@ -70,8 +70,13 @@ h1, h2, h3 {
   stroke-width: .5px;
 }
 
+.point {
+  fill: #fff;
+  stroke: #999;
+}
+
     </style>
-  </head>
+  </header>
   <body>
     <textarea id="source">
 
@@ -91,11 +96,13 @@ This treatment inspired by the record-breaking snowfall in Boston for the winter
 ---
 
 # The Perfect Dataset
-What dataset would make project trivial?
-* Evenly spaced data
-* Daily measurements
+What dataset would minimize data wrangling and thus make this project?
+* Evenly spaced observations
+* Daily observations
 * Covering the earth
 * For all the earth for all of recorded history
+* All in a tidy dataset See:
+https://github.com/Butterwell/datasharing
 
 Let's start with where measurements are made: weather stations. In particular...
 
@@ -107,7 +114,7 @@ The API delivers a maximum of 1000 records a call.
 
 To get the first 1000 weather stations by date with curl:
 ```bash
-token=ThisIsNotAVaildToken
+token=This_is_not_a_valid_token
 curl --header "Token: $token" --get \
 -d datatypeid=SNOW -d limit=1000 -d sortfield=mindate \
 www.ncdc.noaa.gov/cdo-web/api/v2/stations > earliest_1000_snow_stations.json
@@ -118,7 +125,7 @@ This is the same as, given the nodejs file get.js:
 var request = require('request');
 
 var options = {
-    headers: { 'Token': 'ThisIsNotAValidToken' },
+    headers: { 'Token': 'This is not a valid token' },
     uri: 'https://www.ncdc.noaa.gov/cdo-web/api/v2/stations'+
          '?datatypeid=SNOW&limit=1000&sortfield=mindate'
 };
@@ -132,6 +139,13 @@ node get.js > earliest_1000_snow_stations.json
 ```
 ---
 
+# D3 Histograms .subtitle[see]
+[Mike Bostock's Historgram Example](http://bl.ocks.org/mbostock/3048450)
+
+[My rift on that example, this implementation's year_histogram.js](year_histogram.js)
+
+---
+
 # Earliest Weather Stations Measuring Snowfall .subtitle[by Founding Year using D3]
 
 .station_founding_year[]
@@ -142,78 +156,21 @@ node get.js > earliest_1000_snow_stations.json
 
 .stations_active_by_year[]
 
-At this point we don't know where any of these stations are. They might all be in...
+At this point we don't know where any of these stations are. They might all be in the Swiss Alps.
 
 ---
+### This is where an introduction to GeoJSON and TopoJSON goes
+---
+### This is where an introduction to D3 mapping goes
+---
 
-# Canada - .subtitle[ Earliest Weather Stations Measuring Snow]
+# Weather Stations Measuring Snowfall .subtitle[founded before 1890]
 
 .early_station_map[]
 
 ---
 
-Not all, but many are.  This could be misleading... we don't know if there are any measurements for any of these stations. Let's grab some data.
-
----
-
-# Daily Snow Measurements Dataset (Jquery)
-The station information is at the top level of the API. Here's how to search the "datasets" dataset to find all the datasets than have "SNOW", the datatypeid of the field we want:
-```JavaScript
-var token="ThisIsNotAVaildToken"
-var url="https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?datatypeid=SNOW"
-var snow_dataset;
-$.ajax({ url: url, data:{}, headers:{ token: token } })
- .done(function (data) {
-   snow_dataset = {
-     dataset: data.results[0].id,
-     mindate: data.results[0].mindate,
-     maxdate: data.results[0].maxdate
-   }
- })
-```
-This gaves us the dataset name with the SNOW data. D3 has a xhr/ajax nice xhr/ajax interface:
-```JavaScript
-d3.json("https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets")
-  .header("token", token)
-  .get("datatypeid=SNOW", function(error, data) {
-      // callback
-  });
-```
----
-
-# Minimum Visualization Data (1)
-
-Poking around at the data with curl, we find out that the maximum time span is one year. Since we're interested in snow, we break the year at July 1st. We also want a year with under 1000 entries, the maximum allowed in one call.
-```bash
-curl --header "token: $token" --get -d datasetid=GHCND \
--d startdate=1859-07-01 -d enddate=1860-07-01 -d datatypeid=SNOW -d limit=1000 \
-www.ncdc.noaa.gov/cdo-web/api/v2/data > winter_snow_1859_1860.json
-```
-
----
-
-# Minimum Visualization Data (2)
-
-There are 499 entries for this winter. Let's plot the count of non-zero entries.
-
-.snow_measures_1859_1860[]
-
-Several entries at the 230 mark, that's in mm. Boston values for January 1st and 2nd, 2014.
-
-.snow_measures_2014_01_01[]
-
-There are 226 entries and about the same distribution. 230mm is about 9".
-
----
-
-
-# GeoJSON and TopoJSON
-
----
-
-# Projections
-* https://github.com/mbostock/d3/wiki/Geo-Projections
-* http://bl.ocks.org/mbostock/3711652
+### An introduction to dynamic D3 could go here (weather stations plotted by date founded)
 
 ---
 
@@ -221,9 +178,76 @@ There are 226 entries and about the same distribution. 230mm is about 9".
 * Stations are not in a grid
 * Stations do not have data every day
 * Stations are added and removed over time
-# Snowfall
-* First available snowfall measure
-* Coverage Dates
+
+---
+
+# Station Irregularities Can be Solved by Binning
+## Hex Binning
+* https://github.com/d3/d3-plugins/tree/master/hexbin
+* http://bl.ocks.org/Butterwell/333536a01658bb7f5abd
+
+---
+
+# Hexagonal Binning of Station Density .subtitle[founded before 1890]
+.station_hex_map[]
+
+---
+
+# Hexagonal Binning of Station Density by Date .subtitle[founded before 1890]
+.dynamic_station_hex_map[]
+
+---
+
+# Voronoi Tessellation .subtitle[is an alternative to Hexagonal Binning] 
+* http://bl.ocks.org/mbostock/4060366
+
+---
+
+# Most Stations are in Canada and USA .subtitle[(before 1890)]
+But this could be misleading... there might only be three stations measuring. That is, we don't know the distribution of measurements for any of these stations, or between those stations. Let's grab some snowfall data. First, where is it?
+
+---
+
+# Daily Snow Measurements Dataset
+We were able to easily find the station information since it is at the top level of the API. The data is found in a particular dataset, but which one? Here's how to search the "datasets" dataset to find all the datasets than have the datatypeid "SNOW", the field we want:
+```JavaScript
+var token="This is not a vaild token"
+d3.json("https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?datatypeid=SNOW")
+  .header("token", token)
+  .get(function(error, data) {
+     console.log(data.results)
+  });
+```
+Shows us there is one dataset, GHCND, that has the data.
+
+---
+
+# Minimum Visualization Data .subtitle[Getting Some Data]
+
+Poking around at the data with curl, we find out that the maximum time span allowed for GHCND is one year. Since we're interested in snow, we break the year at July 1st. We also want a year with under 1000 entries, the maximum allowed in one call.
+```bash
+curl --header "token: $token" --get -d datasetid=GHCND \
+-d startdate=1859-07-01 -d enddate=1860-07-01 -d datatypeid=SNOW -d limit=1000 \
+www.ncdc.noaa.gov/cdo-web/api/v2/data > winter_snow_1859_1860.json
+```
+---
+
+# Minimum Visualization Data .subtitle[Data Distribution]
+
+There are 499 entries for this winter. Let's plot the count of non-zero entries.
+
+.snow_measures_1859_1860[]
+
+Several entries at the 230mm mark, about 9". How about Boston values for January 1st and 2nd, 2014?
+
+.snow_measures_2014_01_01[]
+
+There are 226 entries and a similar distribution.
+
+---
+
+# Mimimum Visualization .subtitle[of the winter of 1859-1860, averaging the ]
+.snow_hex_map_1859_1860[]
 
 ---
 
@@ -240,19 +264,6 @@ There are 226 entries and about the same distribution. 230mm is about 9".
 
 ---
 
-# Hexagonal Binning
-* https://github.com/d3/d3-plugins/tree/master/hexbin
-* http://bl.ocks.org/mbostock/4248145
-* http://bl.ocks.org/mbostock/4248146
-* http://bl.ocks.org/mbostock/4330486
-
----
-
-# Voronoi Tessellation
-* http://bl.ocks.org/mbostock/4060366
-
----
-
 # Melting
 * Not all stations measure current depth.
 * Since we were not showing the melting all along, is melting lieing?
@@ -262,7 +273,7 @@ There are 226 entries and about the same distribution. 230mm is about 9".
 
 # Wait... How Long is This Going to Take?
 * We have data from 186x to 2015.
-If we display a day's worth of information in one frame, and run the visualization at twenty-four frames a second, a year takes about a second and a half to display. ((2015-1860)*365/24)/60 = 39 minutes. 
+If we display a day's worth of information in one frame, and run the visualization at twenty-four frames a second, a year takes about a second and a half to display. ((2015-1860)*365/24)/60 = 39 minutes.
 
 ---
 
@@ -287,18 +298,28 @@ If we display a day's worth of information in one frame, and run the visualizati
 * CSV encoded
 
 ---
+# Endnotes
+---
+
+# D3 Projections
+* https://github.com/mbostock/d3/wiki/Geo-Projections
+* http://bl.ocks.org/mbostock/3711652
+
+---
 
 # NOAA Available Data
 It took some exploration of the datatypeids to find "SNOW". Here's a list.
 
     </textarea>
-    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
-    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="remark-latest.min.js"></script>
+    <script src="d3.v3.min.js" charset="utf-8"></script>
+    <script src="d3.geo.projection.v0.min.js"></script>
+    <script src="d3.hexbin.v0.min.js"></script>
+    <script src="topojson.v1.min.js"></script>
     <script src="year_histogram.js"></script>
     <script src="map.js"></script>
     <script>
+
       var slideshow = remark.create();
       document.getElementById('source').style.visibility = 'visable';
       slideshow.on('showSlide', function (slide) {
@@ -317,18 +338,25 @@ It took some exploration of the datatypeids to find "SNOW". Here's a list.
       d3.json("earliest_1000_snow_stations.json", function(error, json) {
         if (error) return console.warn(error);
         var station_data = json.results
+        var stations_pre_1890 = station_data.filter( function(d) { return parseInt(d.mindate.substr(0,4)) < 1890 } )
 
-        var founding_years = station_data.map( function(d) { return parseInt(d.mindate.substr(0,4)) })
-        var before_1890 = founding_years.filter( function(d) { return d < 1890 })
-        year_histogram({ selectee: ".station_founding_year", width: 700, height: 300 }, before_1890 )
+        var founding_years = stations_pre_1890.map( function(d) { return parseInt(d.mindate.substr(0,4)) })
+        year_histogram({ selectee: ".station_founding_year", width: 700, height: 300 }, founding_years )
+        year_histogram({ selectee: ".stations_active_by_year", width: 700, height: 300, running_total: true }, founding_years )
 
-        year_histogram({ selectee: ".stations_active_by_year", width: 700, height: 300, running_total: true }, before_1890 )
+        var plotable_stations = stations_pre_1890.filter( function(d){ return d.latitude && d.longitude } )
 
-        var plotable_stations = station_data.filter( function(p){ return p.latitude && p.longitude } )
-        var geojson_stations = plotable_stations.map( function(p){ return { "type": "Point",
-                                                                           "coordinates": [p.longitude, p.latitude]
-                                                                         } })
-        map({ selectee: ".early_station_map", width: 800, height: 600 }, geojson_stations )
+        map_points({ selectee: ".early_station_map", width: 800, height: 600 }, plotable_stations )
+
+        hex_map({ selectee: ".station_hex_map", width: 800, height: 600 }, plotable_stations )
+
+        dynamic_hex_map({ selectee: ".dynamic_station_hex_map", width: 800, height: 600 }, plotable_stations )
+
+        d3.json("winter_snow_1859_1860.json", function(error, json) {
+          if (error) return console.warn(error);
+          var reports = json.results
+          snow_hex_map({ selectee: ".snow_hex_map_1859_1860", width: 800, height: 600 }, plotable_stations, reports )
+        });
       });
 
       // Snowfall histograms

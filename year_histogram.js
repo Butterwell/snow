@@ -1,4 +1,6 @@
-// TODO Make into Github Gist
+// Mostly generic histogram. Some assumptions about data in formatting
+// A rift on http://bl.ocks.org/mbostock/3048450
+
 var year_histogram = function( options, values ) {
 
 // A formatter for counts.
@@ -8,6 +10,7 @@ var margin = {top: 10, right: 60, bottom: 30, left: 30}
 var width = options.width - margin.left - margin.right
 var height = options.height - margin.top - margin.bottom
 
+// TODO Make 3% of raw domain instead
 var x_min = d3.min(values)-1
 var x_max = d3.max(values)+1
 
@@ -34,6 +37,7 @@ if ( options.running_total ) {
   })
 }
 
+// Note range is inverted to align with svg
 var y = d3.scale.linear()
     .domain([0, d3.max(data, function(d) { return d.y; })])
     .range([height, 0]);
@@ -53,24 +57,29 @@ var svg = d3.select(options.selectee).append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+// create bar in svg (origin of bar is top left location)
 var bar = svg.selectAll(".bar")
     .data(data)
   .enter().append("g")
     .attr("class", "bar")
     .attr("transform", function(d,i) { return "translate(" + (i*bar_width - 1) + "," + y(d.y) + ")"; });
 
+// draw bar rectangle to baseline 
 bar.append("rect")
     .attr("x", 1)
     .attr("width", bar_width )
     .attr("height", function(d) { return height - y(d.y); });
 
+// draw x axis
 svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
     .call(xAxis);
 
+// draw y axis
 svg.append("g")
     .attr("class", "y axis")
     .attr("transform", "translate(" + width + ",0)")
     .call(yAxis);
+
 }
